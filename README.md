@@ -1,49 +1,38 @@
-# Laravel REST API with Sanctum
+# Backend API untuk Parking-u
+berikut ini ada beberapa endpoint yang dibuat untuk aplikasi parking-u "
 
-This is an example of a REST API using auth tokens with Laravel Sanctum
-
-## Usage
-
-Change the *.env.example* to *.env* and add your database info
-
-For SQLite, add
-```
-DB_CONNECTION=sqlite
-DB_HOST=127.0.0.1
-DB_PORT=3306
-```
-
-Create a _database.sqlite_ file in the _database_ directory
-
-```
-# Run the webserver on port 8000
-php artisan serve
-```
 
 ## Routes
 
 ```
-# Public
 
-GET   /api/products
-GET   /api/products/:id
-
-POST   /api/login
-@body: email, password
-
-POST   /api/register
-@body: name, email, password, password_confirmation
+// Public routes
+Route::post('/register', [AuthController::class, 'register']);
+Route::post('/login', [AuthController::class, 'login']);
 
 
-# Protected
+// Protected routes
+Route::group(['middleware' => ['auth:sanctum']], function () {
 
-POST   /api/products
-@body: name, slug, description, price
+    //admin
+    Route::post('/parkir', [ParkirController::class, 'store']);
+    Route::put('/parkir/{id}', [ParkirController::class, 'update']);
+    Route::delete('/parkir/{id}', [ParkirController::class, 'destroy']);
+    Route::put('/accept/{id}', [BookingController::class, 'updateBooking']);
+    Route::get('/riwayat/all', [BookingController::class, 'semuaRiwayat']);
+    
+    //user
+    Route::get('/parkir', [ParkirController::class, 'index']);
+    Route::get('/parkir/{id}', [ParkirController::class, 'show']);
+    Route::get('/parkir/search/{nama_parkir}', [ParkirController::class, 'search']);
+    Route::get('/user', [UserController::class, 'index']);//belum bisa
+    Route::get('/user/{id}', [UserController::class, 'show']);
+    Route::put('/user/{id}', [UserController::class, 'update']);
+    Route::get('/booking', [BookingController::class, 'getVA']);
+    Route::post('/booking/add', [BookingController::class, 'createBooking']);
+    Route::get('/riwayat/{email}', [BookingController::class, 'riwayat']);
+    Route::delete('/booking/{id}', [BookingController::class, 'cancelBooking']);
+    
+    //admin+user
+    Route::post('/logout', [AuthController::class, 'logout']);
 
-PUT   /api/products/:id
-@body: ?name, ?slug, ?description, ?price
-
-DELETE  /api/products/:id
-
-POST    /api/logout
-```
